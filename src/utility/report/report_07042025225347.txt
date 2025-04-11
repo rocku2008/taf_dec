@@ -1,0 +1,24 @@
+count check: FAIL
+Details: Count is not matching between source and target. source count3 and target count is 2
+
+Records Only in Target: PASS
+Details: No extra records found in target.
+
+Records Only in Source: FAIL
+Details: Count: 1, Sample Failed Records: [{'firstName': 'Joe', 'lastName': 'Jackson', 'phoneNumbers_number': '71234565555', 'phoneNumbers_type': 'office2'}]
+
+Duplicate Check: PASS
+Details: No duplicates found.
+
+Uniqueness Check: PASS
+Details: Duplicate counts per column: {'phoneNumbers_number': 0, 'phoneNumbers_type': 0}, No uniqueness violations.
+
+Null Value Check: PASS
+Details: No null values found.
+
+data compare Check: FAIL
+Details: Data mismatch data: [{'age': 28, 'firstName': 'Joe', 'gender': 'male', 'lastName': 'Jackson', 'address_city': 'San Diego', 'address_state': 'CA', 'address_streetAddress': '101', 'phoneNumbers_number': '71234565555', 'phoneNumbers_type': 'office2', 'datafrom': 'source'}]
+
+Schema Check: FAIL
+Details: Schema failed columns Count: 1, Sample Failed Records: [{'source_col_name': 'age', 'target_col_name': 'age', 'source_data_type': 'bigint', 'target_data_type': 'int', 'source_position': 0, 'target_position': 0, 'status': 'Data Type Mismatch'}]
+

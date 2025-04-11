@@ -1,0 +1,28 @@
+
+source:
+  path: "C:\\Users\\souls\\PycharmProjects\\MyProj\\taf_dec\\input_files\\singleline.json"
+  type: "json"
+  schema: "N"
+  options:
+    multiline: False
+  exclude_cols: ["created_date","updated_date","hash_key","batch_id"]
+
+target:
+  path: "C:\\Users\\souls\\PycharmProjects\\MyProj\\taf_dec\\input_files\\singleline.json"
+  type: "json"
+  schema: "N"
+  options:
+    multiline: False
+  exclude_cols: ["created_date","updated_date","hash_key","batch_id"]
+
+validations:
+  count_check:
+    key_columns: ["RecordNumber"]
+  duplicate_check:
+    key_columns: ["RecordNumber"]
+  null_check:
+    null_columns: ["RecordNumber","ZipCode","City", "State"]
+  uniqueness_check:
+    unique_columns: ["RecordNumber","ZipCode","City", "State"]
+  data_compare_check:
+    key_column: ["RecordNumber"]

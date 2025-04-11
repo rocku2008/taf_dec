@@ -1,0 +1,51 @@
+dev:
+  postgres:
+    url: "jdbc:postgresql://localhost:5432/postgres"
+    user: "postgres"
+    password: "Iphone9@"
+    driver: "org.postgresql.Driver"
+    port: 5432
+
+  oracle:
+    username: "test123"
+    password: "oracle_password"
+    connection_string: "jdbc:oracle:thin:@//dev-db-host:1521/ORCL"
+
+  adls:
+    account_name: "myadlsdevaccount"
+    account_key: "myadlsdevkey"
+
+qa:
+  postgres:
+    url: "jdbc:postgresql://localhost:5432/postgres"
+    user: "postgres"
+    password: "Iphone9@"
+    driver: "org.postgresql.Driver"
+    port: 5432
+
+  snowflake:
+    url: "jdbc:snowflake://tqtrcxi-cw03901.snowflakecomputing.com"
+    user: "KSREENIVASULU"
+    password: "Dharmavaram@2024"
+    database: "TEST_DB"
+    schema: "TEST_SCHEMA"
+    driver: "net.snowflake.client.jdbc.SnowflakeDriver"
+
+  sqlserver:
+    url: "jdbc:sqlserver://septauto.database.windows.net:1433;database=septbatch"
+    user: "septadmin"
+    password: "Dharmavaram1@"
+    driver: "com.microsoft.sqlserver.jdbc.SQLServerDriver"
+
+
+prod:
+  postgres:
+    url: "jdbc:postgresql://localhost:5432/postgres"
+    user: "postgres"
+    password: "Iphone9@"
+    driver: "org.postgresql.Driver"
+    port: 5432
+  oracle:
+    username: "oracle_user"
+    password: "oracle_password"
+    connection_string: "jdbc:oracle:thin:@//dev-db-host:1521/ORCL"

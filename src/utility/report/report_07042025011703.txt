@@ -1,0 +1,18 @@
+count check: PASS
+Details: Count is matching between source and target. source count21 and target count is 21
+
+Records Only in Target: PASS
+Details: No extra records found in target.
+
+Records Only in Source: PASS
+Details: No extra records found in source.
+
+Duplicate Check: FAIL
+Details: Duplicate Count: 1, Sample Failed Records: [{'RecordNumber': 10, 'count': 2}]
+
+Uniqueness Check: FAIL
+Details: Duplicate counts per column: {'RecordNumber': 1, 'ZipCode': 2, 'City': 3, 'State': 6}, Sample Failed Records: {'RecordNumber': [{'RecordNumber': 10, 'count': 2}], 'ZipCode': [{'ZipCode': 704, 'count': 4}, {'ZipCode': 76177, 'count': 2}], 'City': [{'City': 'MESA', 'count': 2}, {'City': 'ASHEBORO', 'count': 2}, {'City': 'BDA SAN LUIS', 'count': 2}], 'State': [{'State': 'AZ', 'count': 2}, {'State': 'NC', 'count': 3}, {'State': 'AL', 'count': 3}, {'State': 'TX', 'count': 3}, {'State': 'FL', 'count': 4}]}
+
+Null Value Check: PASS
+Details: No null values found.
+

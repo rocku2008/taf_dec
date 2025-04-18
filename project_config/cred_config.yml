@@ -32,11 +32,26 @@ qa:
     driver: "net.snowflake.client.jdbc.SnowflakeDriver"
 
   sqlserver:
-    url: "jdbc:sqlserver://septauto.database.windows.net:1433;database=septbatch"
-    user: "septadmin"
+    url: "jdbc:sqlserver://decserver21.database.windows.net:1433;database=decautodb2" #my azure sql server details
+    user: "decadmin"
     password: "Dharmavaram1@"
     driver: "com.microsoft.sqlserver.jdbc.SQLServerDriver"
 
+  #sqlserver:
+    #url: "jdbc:sqlserver://decserver.database.windows.net:1433;database=decauto" #Sreenis azure sql server details
+    #user: "decadmin"
+    #password: "Dharmavaram1@"
+    #driver: "com.microsoft.sqlserver.jdbc.SQLServerDriver"
+
+  adls:
+    adls_account_name: "decauto21"
+    adls_container_name: "test"
+    key: "9Gn7n0tlNXAi7cImLo2zM375TWtCeWYFhJa+vcEXz6/MAgJcNTPn9xzC44EiwfFOnYZkQ1IrEajO+AStFp8xDQ=="  # Your Account Key#my adls accout#
+
+  #adls:
+#    adls_account_name: "decautoadls"
+#    adls_container_name: "test"
+#    key: "vnH8MP/h4VB5vbfsP1x9rAZ5PiyMkIk5RBPnxCbrAjupr7GXMiCv0fHDuySVA036WYaKQDVXcMzz+AStHfeBKQ=="  # Your Account Key  #Sreenis adls account#
 
 prod:
   postgres:

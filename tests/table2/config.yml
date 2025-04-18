@@ -28,3 +28,13 @@ validations:
   data_compare_check:
     key_column: ["Identifier"]
     num_records: 100
+
+data_quality_checks:
+  name_check:
+    column: "given_name"
+  check_range:
+    column: zipcode_prev
+    min_val: 515670
+    max_val: 515685
+  date_check:
+    column: birthmonth

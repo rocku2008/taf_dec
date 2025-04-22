@@ -35,6 +35,7 @@ def spark_session(request):
     key = cred['key']
     spark.conf.set(f"fs.azure.account.auth.type.{adls_account_name}.dfs.core.windows.net", "SharedKey")
     spark.conf.set(f"fs.azure.account.key.{adls_account_name}.dfs.core.windows.net", key)
+
     return spark
     #yield spark
     #spark.stop()

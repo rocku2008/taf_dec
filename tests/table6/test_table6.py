@@ -19,39 +19,39 @@ def test_count_check(read_data,read_config):
     status = count_val(source=source, target=target,key_columns=key_columns)
     assert status == 'PASS'
 
-# def test_duplicate_check(read_data,read_config):
-#     source, target = read_data
-#     read_config = read_config
-#     key_columns = read_config['validations']['duplicate_check']['key_columns']
-#     status = duplicate_check( df=target,key_col=key_columns)
-#     assert status == 'PASS'
-#
-# def test_uniqueness_check(read_data,read_config):
-#     source, target = read_data
-#     read_config = read_config
-#     unique_cols = read_config['validations']['uniqueness_check']['unique_columns']
-#     status = uniqueness_check( df=target,unique_cols=unique_cols)
-#     assert status == 'PASS'
-#
-# def test_null_check(read_data,read_config):
-#     source, target = read_data
-#     read_config = read_config
-#     null_cols = read_config['validations']['null_check']['null_columns']
-#     status = null_value_check( df=target,null_cols=null_cols)
-#     assert status == 'PASS'
-#
-# def test_data_compare_check(read_data,read_config):
-#     source, target = read_data
-#     read_config = read_config
-#     key_columns = read_config['validations']['data_compare_check']['key_column']
-#     num_records = read_config['validations']['data_compare_check']['num_records']
-#     status = data_compare(source=source, target=target, key_column=key_columns, num_records=num_records)
-#     assert status == 'PASS'
-#
-# def test_schema_check(read_data,read_config,spark_session):
-#     source, target = read_data
-#     #read_config = read_config
-#     status = schema_check(source=source,target=target,spark=spark_session)
-#     assert status == 'PASS'
+def test_duplicate_check(read_data,read_config):
+    source, target = read_data
+    read_config = read_config
+    key_columns = read_config['validations']['duplicate_check']['key_columns']
+    status = duplicate_check( df=target,key_col=key_columns)
+    assert status == 'PASS'
+
+def test_uniqueness_check(read_data,read_config):
+    source, target = read_data
+    read_config = read_config
+    unique_cols = read_config['validations']['uniqueness_check']['unique_columns']
+    status = uniqueness_check( df=target,unique_cols=unique_cols)
+    assert status == 'PASS'
+
+def test_null_check(read_data,read_config):
+    source, target = read_data
+    read_config = read_config
+    null_cols = read_config['validations']['null_check']['null_columns']
+    status = null_value_check( df=target,null_cols=null_cols)
+    assert status == 'PASS'
+
+def test_data_compare_check(read_data,read_config):
+    source, target = read_data
+    read_config = read_config
+    key_columns = read_config['validations']['data_compare_check']['key_column']
+    num_records = read_config['validations']['data_compare_check']['num_records']
+    status = data_compare(source=source, target=target, key_column=key_columns, num_records=num_records)
+    assert status == 'PASS'
+
+def test_schema_check(read_data,read_config,spark_session):
+    source, target = read_data
+    #read_config = read_config
+    status = schema_check(source=source,target=target,spark=spark_session)
+    assert status == 'PASS'
 
 

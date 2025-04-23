@@ -1,9 +1,0 @@
-count check: FAIL
-Details: Count is not matching between source and target. source count11 and target count is 1
-
-Records Only in Target: PASS
-Details: No extra records found in target.
-
-Records Only in Source: FAIL
-Details: Count: 10, Sample Failed Records: [{'identifier': 6}, {'identifier': 3}, {'identifier': 5}, {'identifier': 9}, {'identifier': 4}]
-

@@ -10,6 +10,7 @@
 # from src.utility.general_utility import flatten
 # # Initialize Spark session
 # spark = (SparkSession.builder.master("local[2]")
+
 #         .config("spark.jars", "C:\\Users\\souls\\PycharmProjects\\MyProj\\taf_dec\\jars\\postgresql-42.2.5.jar")
 #         .appName("pytest_framework")
 #         .getOrCreate())

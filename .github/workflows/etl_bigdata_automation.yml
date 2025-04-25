@@ -53,7 +53,7 @@ jobs:
 
     - name: Download necessary JARs
       run: |
-        # Create a directory to store JARs in the /tmp directory (or any directory with write permissions)
+        # Create a directory to store JARs in the /tmp directory
         mkdir -p /tmp/spark_jars
 
         # Download all necessary JARs
@@ -63,11 +63,16 @@ jobs:
         wget https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-azure/3.3.1/hadoop-azure-3.3.1.jar -P /tmp/spark_jars/
         wget https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/12.2.0.jre8/mssql-jdbc-12.2.0.jre8.jar -P /tmp/spark_jars/
 
-    - name: Set Spark configurations for JARs
+    - name: Set Spark configurations for JARs and Azure Storage
       run: |
         # Configure Spark to use the downloaded JARs
         echo "export SPARK_CONF_DIR=$SPARK_HOME/conf" >> $GITHUB_ENV
         echo "spark.jars=$(find /tmp/spark_jars -type f | tr '\n' ',')" >> $GITHUB_ENV
+        
+        # Add configurations for Azure Blob Storage
+        echo "spark.hadoop.fs.azure=org.apache.hadoop.fs.azure.NativeAzureFileSystem" >> $GITHUB_ENV
+        echo "spark.hadoop.fs.azurebfs=org.apache.hadoop.fs.azurebfs.SecureAzureBlobFileSystem" >> $GITHUB_ENV
+        echo "spark.hadoop.fs.azure.account.key.<your-storage-account-name>.blob.core.windows.net=<your-account-key>" >> $GITHUB_ENV
 
     - name: Automation execution
       run: |

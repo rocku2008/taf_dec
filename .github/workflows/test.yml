@@ -12,7 +12,9 @@ jobs:
     steps:
       # Step 1: Checkout the entire repository using the stable version of actions/checkout
       - name: Checkout repository
-        uses: actions/checkout@v2  # This is the stable version (v2)
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Ensure the full history is checked out
 
       # Step 2: List files in the root directory for debugging
       - name: List files in the root directory
@@ -48,15 +50,6 @@ jobs:
             echo "taf_dec/tests/table4 or transformation.py does NOT exist!"
             exit 1
           fi
-
-      # Step 7: Cache Python dependencies
-      - name: Cache Python dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-python-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-python-
 
       # Step 8: Install dependencies
       - name: Install dependencies

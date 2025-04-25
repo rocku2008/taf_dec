@@ -10,10 +10,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      # Step to list files for debugging
+      # List the files in the root directory for debugging
+      - name: List files in the root directory
+        run: |
+          ls -R
+
+      # List files in taf_dec/tests/table4 to verify transformation.py is there
       - name: List files in taf_dec/tests/table4
         run: |
           ls -R taf_dec/tests/table4
@@ -25,9 +31,11 @@ jobs:
           path: ~/.cache/pip
           key: ${{ runner.os }}-python-${{ github.sha }}  # Force cache reset
 
-      # Set the working directory if necessary
-      - name: Set working directory
-        run: cd taf_dec/tests/table4
+      # Debug the current directory
+      - name: Check current working directory
+        run: pwd
 
+      # Run the Python transformation script using absolute path
       - name: Run transformation script
-        run: python transformation.py
+        run: |
+          python ./taf_dec/tests/table4/transformation.py

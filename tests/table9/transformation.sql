@@ -1,0 +1,1 @@
+SELECT a.*, dense_rank() over ( PARTITION BY batchid ORDER	BY batchid DESC) rnk from dbo.customers_raw

@@ -37,7 +37,7 @@ qa:
     password: "Dharmavaram1@"
     driver: "com.microsoft.sqlserver.jdbc.SQLServerDriver"
 
-#  sqlserver:
+  #sqlserver:
 #    url: "jdbc:sqlserver://decserver.database.windows.net:1433;database=decauto" #Sreenis azure sql server details
 #    user: "decadmin"
 #    password: "Dharmavaram1@"

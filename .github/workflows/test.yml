@@ -10,11 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the entire repository
+      # Step 1: Checkout the entire repository using the stable version of actions/checkout
       - name: Checkout repository
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0  # Ensures the full history is fetched (complete repository)
+        uses: actions/checkout@v2  # This is the stable version (v2)
 
       # Step 2: List files in the root directory for debugging
       - name: List files in the root directory
@@ -51,12 +49,12 @@ jobs:
             exit 1
           fi
 
-      # Step 7: Cache Python dependencies (using Python version and sha256 hash of requirements)
+      # Step 7: Cache Python dependencies
       - name: Cache Python dependencies
         uses: actions/cache@v2
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-python-${{ hashFiles('**/requirements.txt') }}  # Use hash of requirements.txt to ensure cache invalidation
+          key: ${{ runner.os }}-python-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-python-
 

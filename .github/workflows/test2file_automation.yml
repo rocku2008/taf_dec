@@ -25,17 +25,15 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name:   Test with pytest
+    - name: Show Current Directory
+      run: pwd
+    - name: List Files and Directories
+      run: ls -al
+    - name: Change to the taf_dec directory
       run: |
-        #  Change this to the correct relative path.
-        if [ -d taf_dec ]; then
-          echo "Directory taf_dec exists!"
-          python runner2.py 
-        elif [ -d  "taf_dec" ]; then
-          echo "Directory taf_dec exists!"
-          python runner2.py
-        else
-          echo "Directory taf_dec does NOT exist!"
-          exit 1
-        fi
+        cd taf_dec
+        echo "Changed directory to: $(pwd)"
+        ls -al
+    - name: Test with pytest
+      run: python runner2.py
       shell: /usr/bin/bash -e

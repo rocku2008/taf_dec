@@ -49,13 +49,6 @@ jobs:
             exit 1
           fi
 
-      # Cache Python dependencies (if needed)
-      - name: Cache Python dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-python-${{ github.sha }}
-
       # Run the transformation script
       - name: Run transformation script
         run: |

@@ -3,19 +3,29 @@ name: Run Transformation Script
 on:
   push:
     branches:
-      - main  # or whichever branch you want to run the script on
+      - main
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # or use your preferred OS, like windows-latest if required
+    runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Check out the repository
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    # Step 2: Set the working directory to the folder containing your transformation.py
-    - name: Run transformation script
-      run: |
-        cd taf_dec/tests/table4  # Adjust this to match where your transformation.py file is located in the repo
-        python3 transformation.py
+      # Step to list files for debugging
+      - name: List files in taf_dec/tests/table4
+        run: |
+          ls -R taf_dec/tests/table4
+
+      # Cache dependencies (no caching in this case)
+      - name: Cache Python dependencies (if needed)
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ github.sha }}  # Force cache reset
+
+      - name: Run transformation script
+        run: |
+          cd taf_dec/tests/table4
+          python3 transformation.py

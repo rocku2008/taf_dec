@@ -15,19 +15,19 @@ from src.utility.general_utility import flatten
 sys.dont_write_bytecode = True
 
 
-def get_jar_paths():
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    jar_dir = os.path.join(base_dir, 'jars')
-
-    jars = [
-        os.path.join(jar_dir, 'snowflake-jdbc-3.22.0.jar'),
-        os.path.join(jar_dir, 'postgresql-42.2.5.jar'),
-        os.path.join(jar_dir, 'azure-storage-8.6.6.jar'),
-        os.path.join(jar_dir, 'hadoop-azure-3.3.1.jar'),
-        os.path.join(jar_dir, 'mssql-jdbc-12.2.0.jre8.jar')
-    ]
-
-    return ",".join(jars)
+# def get_jar_paths():
+#     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+#     jar_dir = os.path.join(base_dir, 'jars')
+#
+#     jars = [
+#         os.path.join(jar_dir, 'snowflake-jdbc-3.22.0.jar'),
+#         os.path.join(jar_dir, 'postgresql-42.2.5.jar'),
+#         os.path.join(jar_dir, 'azure-storage-8.6.6.jar'),
+#         os.path.join(jar_dir, 'hadoop-azure-3.3.1.jar'),
+#         os.path.join(jar_dir, 'mssql-jdbc-12.2.0.jre8.jar')
+#     ]
+#
+#     return ",".join(jars)
 
 def resolve_path(relative_path, base_dir=None):
     # Return as-is if it's a URI (cloud, DBFS, or remote path)
@@ -66,10 +66,20 @@ def load_credentials(env="qa"):
 
 @pytest.fixture(scope='session')
 def spark_session(request):
-    #base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    #jar_dir = os.path.join(base_dir, 'jars')
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    jars_dir_name = 'jars'
+    jar_dir = os.path.join(base_dir, jars_dir_name)
 
-    jar_path = get_jar_paths()#this is for local execution
+    #jar_path = get_jar_paths()#this is for local execution
+    snowflake_jar = os.path.join(jars_dir, 'snowflake-jdbc-3.22.0.jar')
+    postgresql_jar = os.path.join(jars_dir, 'postgresql-42.2.5.jar')
+    azure_storage_jar = os.path.join(jars_dir, 'azure-storage-8.6.6.jar')
+    hadoop_azure_jar = os.path.join(jars_dir, 'hadoop-azure-3.3.1.jar')
+    mssql_jar = os.path.join(jars_dir, 'mssql-jdbc-12.2.0.jre8.jar')
+
+    # Construct the spark.jars string
+    jar_path = f"{snowflake_jar},{postgresql_jar},{azure_storage_jar},{hadoop_azure_jar},{mssql_jar}"
+
     spark = SparkSession.builder.master("local[1]") \
         .appName("pytest_framework") \
         .config("spark.jars", jar_path) \

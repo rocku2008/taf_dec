@@ -52,8 +52,10 @@ def resolve_path(relative_path, base_dir=None):
 
 def load_credentials(env="qa"):
     """Load credentials from the centralized YAML file."""
-    taf_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    credentials_path = os.path.join(taf_path, 'project_config', 'cred_config.yml')
+    project_root = Path(__file__).resolve().parent.parent
+    credentials_path = project_root / 'project_config' / 'cred_config.yml'
+    #taf_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    #credentials_path = os.path.join(taf_path, 'project_config', 'cred_config.yml')
 
     with open(credentials_path, "r") as file:
         credentials = yaml.safe_load(file)
@@ -64,8 +66,8 @@ def load_credentials(env="qa"):
 
 @pytest.fixture(scope='session')
 def spark_session(request):
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    jar_dir = os.path.join(base_dir, 'jars')
+    #base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    #jar_dir = os.path.join(base_dir, 'jars')
 
     jar_path = get_jar_paths()#this is for local execution
     spark = SparkSession.builder.master("local[1]") \

@@ -69,6 +69,8 @@ def spark_session(request):
         .config("spark.jars", jar_path) \
         .config("spark.driver.extraClassPath", jar_path) \
         .config("spark.executor.extraClassPath", jar_path) \
+        .config("spark.hadoop.fs.azure", "org.apache.hadoop.fs.azure.NativeAzureFileSystem") \
+        .config("spark.hadoop.fs.azurebfs.impl", "org.apache.hadoop.fs.azurebfs.SecureAzureBlobFileSystem") \
         .getOrCreate()
 
     # Set ADLS credentials if needed

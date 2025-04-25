@@ -1,10 +1,10 @@
-name: etlbigdataautomation
+name: ETL Big Data Automation
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 permissions:
   contents: read
@@ -28,44 +28,42 @@ jobs:
         pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-    - name: Install Spark with JAR dependencies
+    - name: Install Apache Spark
       run: |
-        SPARK_VERSION=3.4.0  # Updated Spark version
-        HADOOP_VERSION=hadoop3.2  # Ensure this version is compatible
+        # Set variables for Spark version and Hadoop version
+        SPARK_VERSION=3.4.2
+        HADOOP_VERSION=hadoop3
         DOWNLOAD_URL=https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-${HADOOP_VERSION}.tgz
         TARGET_DIR=/opt/spark
-
+        
         # Download Apache Spark
         wget ${DOWNLOAD_URL} -O /tmp/spark-${SPARK_VERSION}-bin-${HADOOP_VERSION}.tgz
-
+        
         # Verify if the download was successful
         if [ $? -ne 0 ]; then
           echo "Download failed! Please check the URL."
           exit 1
         fi
-
+        
         # Extract Spark to the target directory
         tar -xvzf /tmp/spark-${SPARK_VERSION}-bin-${HADOOP_VERSION}.tgz -C /opt/
-
+        
         # Set environment variables for Spark
         echo "export SPARK_HOME=/opt/spark/spark-${SPARK_VERSION}-bin-${HADOOP_VERSION}" >> $GITHUB_ENV
         echo "export PATH=$SPARK_HOME/bin:$PATH" >> $GITHUB_ENV
 
-        # Create directories for JARs
+    - name: Set JARs for Spark
+      run: |
+        # Create a directory to store JARs within the SPARK_HOME directory
         mkdir -p $SPARK_HOME/jars
 
-        # Download required JARs in parallel using background processes
-        wget https://repo1.maven.org/maven2/net/snowflake/snowflake-jdbc/3.22.0/snowflake-jdbc-3.22.0.jar -P $SPARK_HOME/jars/ &
-        wget https://repo1.maven.org/maven2/org/postgresql/postgresql/42.2.5/postgresql-42.2.5.jar -P $SPARK_HOME/jars/ &
-        wget https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/12.2.0.jre8/mssql-jdbc-12.2.0.jre8.jar -P $SPARK_HOME/jars/ &
-        wget https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-azure/3.3.1/hadoop-azure-3.3.1.jar -P $SPARK_HOME/jars/ &
-        wget https://repo1.maven.org/maven2/com/microsoft/azure/azure-storage/8.6.6/azure-storage-8.6.6.jar -P $SPARK_HOME/jars/ &
+        # Copy required JAR files to the Spark JARs directory
+        cp /path/to/jars/snowflake-jdbc-3.22.0.jar $SPARK_HOME/jars/
+        cp /path/to/jars/postgresql-42.2.5.jar $SPARK_HOME/jars/
+        cp /path/to/jars/azure-storage-8.6.6.jar $SPARK_HOME/jars/
+        cp /path/to/jars/hadoop-azure-3.3.1.jar $SPARK_HOME/jars/
+        cp /path/to/jars/mssql-jdbc-12.2.0.jre8.jar $SPARK_HOME/jars/
 
-        # Wait for all downloads to complete
-        wait
-
-        # Set Spark JARs configuration to include the downloaded JARs
-        echo "spark.jars=$SPARK_HOME/jars/snowflake-jdbc-3.22.0.jar,$SPARK_HOME/jars/postgresql-42.2.5.jar,$SPARK_HOME/jars/mssql-jdbc-12.2.0.jre8.jar,$SPARK_HOME/jars/hadoop-azure-3.3.1.jar,$SPARK_HOME/jars/azure-storage-8.6.6.jar" >> $GITHUB_ENV
-
-    - name: Automation execution
-      run: python runner.py
+    - name: Run automation execution
+      run: |
+        python runner.py

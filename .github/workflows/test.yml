@@ -29,7 +29,7 @@ jobs:
       # Step 4: Ensure taf_dec directory exists in the expected path
       - name: Check if taf_dec directory exists
         run: |
-          if [ -d /home/runner/work/taf_dec/taf_dec/taf_dec ]; then
+          if [ -d /home/runner/work/taf_dec/taf_dec ]; then
             echo "Directory taf_dec exists in the correct path!"
           else
             echo "Directory taf_dec does NOT exist in the expected path!"
@@ -39,9 +39,9 @@ jobs:
       # Step 5: List files inside taf_dec directory to check for structure
       - name: List files in taf_dec directory
         run: |
-          ls -R /home/runner/work/taf_dec/taf_dec/taf_dec
+          ls -R /home/runner/work/taf_dec/taf_dec
           
       # Step 6: Run the transformation script
       - name: Run transformation script
         run: |
-          python /home/runner/work/taf_dec/taf_dec/taf_dec/tests/table4/transformation.py
+          python /home/runner/work/taf_dec/taf_dec/tests/table4/transformation.py

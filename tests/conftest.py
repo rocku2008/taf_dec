@@ -7,6 +7,7 @@ import yaml
 import subprocess
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType
+from pathlib import Path
 from src.utility.general_utility import flatten
 
 # Disable .pyc generation
@@ -26,6 +27,13 @@ def get_jar_paths():
     ]
 
     return ",".join(jars)
+
+def resolve_path(relative_path, base_dir=None):
+    if base_dir is None:
+        base_dir = Path(__file__).resolve().parent.parent
+    abs_path = (base_dir / relative_path).resolve()
+    return abs_path.as_uri()
+
 
 
 def load_credentials(env="qa"):
@@ -83,22 +91,40 @@ def read_query(dir_path):
 
 
 def read_file(config_data, spark, dir_path):
-    df = None
+    # df = None
+    # if config_data['type'] == 'csv':
+    #     if config_data['schema'] == 'Y':
+    #         schema = read_schema(dir_path)
+    #         df = spark.read.schema(schema).csv(config_data['path'], header=config_data['options']['header'])
+    #     else:
+    #         df = spark.read.csv(config_data['path'], header=config_data['options']['header'], inferSchema=True)
+    # elif config_data['type'] == 'json':
+    #     df = spark.read.json(config_data['path'], multiLine=config_data['options']['multiline'])
+    #     df = flatten(df)
+    # elif config_data['type'] == 'parquet':
+    #     df = spark.read.parquet(config_data['path'])
+    # elif config_data['type'] == 'avro':
+    #     df = spark.read.format('avro').load(config_data['path'])
+    # elif config_data['type'] == 'txt':
+    #     pass  # Add handling if needed
+    # return df
+    file_uri = resolve_path(config_data['path'])
+    abs_path = file_uri
     if config_data['type'] == 'csv':
         if config_data['schema'] == 'Y':
             schema = read_schema(dir_path)
-            df = spark.read.schema(schema).csv(config_data['path'], header=config_data['options']['header'])
+            df = spark.read.schema(schema).csv(abs_path, header=config_data['options']['header'])
         else:
-            df = spark.read.csv(config_data['path'], header=config_data['options']['header'], inferSchema=True)
+            df = spark.read.csv(abs_path, header=config_data['options']['header'], inferSchema=True)
     elif config_data['type'] == 'json':
-        df = spark.read.json(config_data['path'], multiLine=config_data['options']['multiline'])
+        df = spark.read.json(abs_path, multiLine=config_data['options'].get('multiline', False))
         df = flatten(df)
     elif config_data['type'] == 'parquet':
-        df = spark.read.parquet(config_data['path'])
+        df = spark.read.parquet(abs_path)
     elif config_data['type'] == 'avro':
-        df = spark.read.format('avro').load(config_data['path'])
-    elif config_data['type'] == 'txt':
-        pass  # Add handling if needed
+        df = spark.read.format('avro').load(abs_path)
+    else:
+        raise ValueError(f"Unsupported file type: {config_data['type']}")
     return df
 
 

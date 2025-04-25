@@ -24,6 +24,16 @@ jobs:
         run: |
           ls -R taf_dec/tests/table4
 
+      # Check if the transformation.py file exists
+      - name: Check if transformation.py exists
+        run: |
+          if [ -f taf_dec/tests/table4/transformation.py ]; then
+            echo "transformation.py exists!"
+          else
+            echo "transformation.py does NOT exist!"
+            exit 1
+          fi
+
       # Cache Python dependencies (if needed)
       - name: Cache Python dependencies (if needed)
         uses: actions/cache@v2

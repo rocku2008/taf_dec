@@ -10,46 +10,55 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repository
+      # Step 1: Checkout the entire repository
       - name: Checkout repository
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Ensures the full history is fetched (complete repository)
 
-      # List files in the root directory for debugging purposes
+      # Step 2: List files in the root directory for debugging
       - name: List files in the root directory
         run: |
           ls -R
 
-      # List files in the taf_dec directory for debugging
+      # Step 3: Ensure taf_dec directory exists in the root
+      - name: Check if taf_dec directory exists
+        run: |
+          if [ -d taf_dec ]; then
+            echo "Directory taf_dec exists in the root!"
+          else
+            echo "Directory taf_dec does NOT exist in the root!"
+            exit 1
+          fi
+
+      # Step 4: List files in the taf_dec directory to see the structure
       - name: List files in taf_dec directory
         run: |
           ls -R taf_dec
 
-      # List files in the taf_dec/tests directory to check if 'table4' exists
+      # Step 5: List files in taf_dec/tests directory to check for table4
       - name: List files in taf_dec/tests directory
         run: |
           ls -R taf_dec/tests
 
-      # Check if taf_dec/tests/table4 exists
-      - name: Check if taf_dec/tests/table4 exists
+      # Step 6: Ensure taf_dec/tests/table4 exists and transformation.py is present
+      - name: Ensure taf_dec/tests/table4 and transformation.py exist
         run: |
-          if [ -d taf_dec/tests/table4 ]; then
-            echo "Directory taf_dec/tests/table4 exists!"
+          if [ -d taf_dec/tests/table4 ] && [ -f taf_dec/tests/table4/transformation.py ]; then
+            echo "taf_dec/tests/table4 and transformation.py exist!"
           else
-            echo "Directory taf_dec/tests/table4 does NOT exist!"
+            echo "taf_dec/tests/table4 or transformation.py does NOT exist!"
             exit 1
           fi
 
-      # Check if transformation.py exists
-      - name: Check if transformation.py exists
-        run: |
-          if [ -f taf_dec/tests/table4/transformation.py ]; then
-            echo "transformation.py exists!"
-          else
-            echo "transformation.py does NOT exist!"
-            exit 1
-          fi
+      # Step 7: Cache Python dependencies
+      - name: Cache Python dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ github.sha }}
 
-      # Run the transformation script
+      # Step 8: Run the transformation script
       - name: Run transformation script
         run: |
           python taf_dec/tests/table4/transformation.py

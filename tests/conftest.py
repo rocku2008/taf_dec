@@ -68,7 +68,7 @@ def load_credentials(env="qa"):
 def spark_session(request):
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     jars_dir_name = 'jars'
-    jar_dir = os.path.join(base_dir, jars_dir_name)
+    jars_dir = os.path.join(base_dir, jars_dir_name)
 
     #jar_path = get_jar_paths()#this is for local execution
     snowflake_jar = os.path.join(jars_dir, 'snowflake-jdbc-3.22.0.jar')

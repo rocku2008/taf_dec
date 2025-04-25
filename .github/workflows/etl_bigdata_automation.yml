@@ -18,12 +18,16 @@ jobs:
         run: |
           ls -R taf_dec/tests/table4
 
-      # Cache dependencies (no caching in this case)
+      # Cache Python dependencies (if needed)
       - name: Cache Python dependencies (if needed)
         uses: actions/cache@v2
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-python-${{ github.sha }}  # Force cache reset
 
+      # Set the working directory if necessary
+      - name: Set working directory
+        run: cd taf_dec/tests/table4
+
       - name: Run transformation script
-        run: python taf_dec/tests/table4/transformation.py
+        run: python transformation.py

@@ -8,7 +8,7 @@ import os
 def load_credentials(env="qa"):
     """Load credentials from the centralized YAML file."""
     project_root = Path(__file__).resolve().parent.parent
-    credentials_path = project_root / 'project_config' / 'cred_config.yml'
+    credentials_path = project_root / 'taf_dec' / 'project_config' / 'cred_config.yml'  # corrected path
 
     with open(credentials_path, "r") as file:
         credentials = yaml.safe_load(file)
@@ -50,7 +50,7 @@ source1 = source1.withColumn('source_id', lit('postgres'))
 
 # Read from CSV (dynamically resolve path)
 project_root = Path(__file__).resolve().parent.parent
-csv_path = project_root / "input_files" / "customers.csv"
+csv_path = project_root / 'taf_dec'/"input_files" / "customers.csv" # corrected path
 source2 = spark.read.csv(str(csv_path), header=True, inferSchema=True)
 source2 = source2.select("id", 'first_name').withColumn('source_id', lit('file'))
 

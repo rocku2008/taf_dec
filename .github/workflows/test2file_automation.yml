@@ -28,12 +28,16 @@ jobs:
     - name: Show Current Directory
       run: pwd
     - name: List Files and Directories
-      run: ls -al
-    - name: Change to the taf_dec directory
+      run: ls -alR #Added recursive listing
+    - name: Check for transformation.py
       run: |
-        cd taf_dec
-        echo "Changed directory to: $(pwd)"
-        ls -al
+        # Check for the existence of the directory and the file, adjust the path
+        if [ -d "taf_dec/tests/table4" ] && [ -f "taf_dec/tests/table4/transformation.py" ]; then
+          echo "taf_dec/tests/table4 and transformation.py exist!"
+        else
+          echo "taf_dec/tests/table4 or transformation.py does NOT exist!"
+          exit 1
+        fi
     - name: Test with pytest
       run: python runner2.py
       shell: /usr/bin/bash -e

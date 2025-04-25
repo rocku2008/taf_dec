@@ -10,24 +10,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the entire repository
+      # Step 1: Checkout the repository
       - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0  # Ensure the entire history is checked out
+        uses: actions/checkout@v2  # Using v2 for checking out the repository
 
-      # Step 2: List all files in the root directory for debugging
+      # Step 2: List the files in the workspace for debugging
       - name: List files in the root directory
         run: |
           ls -R
 
-      # Step 3: Check the exact directory structure and case of 'taf_dec'
-      - name: List directories in the root directory
-        run: |
-          ls -d */  # List only directories in the root
-
-      # Step 4: Ensure taf_dec directory exists in the expected path
-      - name: Check if taf_dec directory exists
+      # Step 3: Check if taf_dec exists at the second level
+      - name: Check if taf_dec exists in the correct path
         run: |
           if [ -d /home/runner/work/taf_dec/taf_dec ]; then
             echo "Directory taf_dec exists in the correct path!"
@@ -35,13 +28,39 @@ jobs:
             echo "Directory taf_dec does NOT exist in the expected path!"
             exit 1
           fi
-          
-      # Step 5: List files inside taf_dec directory to check for structure
+
+      # Step 4: List files in taf_dec directory
       - name: List files in taf_dec directory
         run: |
           ls -R /home/runner/work/taf_dec/taf_dec
-          
-      # Step 6: Run the transformation script
+
+      # Step 5: Ensure taf_dec/tests/table4 and transformation.py exist
+      - name: Ensure taf_dec/tests/table4 and transformation.py exist
+        run: |
+          if [ -d /home/runner/work/taf_dec/taf_dec/taf_dec/tests/table4 ] && [ -f /home/runner/work/taf_dec/taf_dec/taf_dec/tests/table4/transformation.py ]; then
+            echo "taf_dec/tests/table4 and transformation.py exist!"
+          else
+            echo "taf_dec/tests/table4 or transformation.py does NOT exist!"
+            exit 1
+          fi
+
+      # Step 6: Cache Python dependencies
+      - name: Cache Python dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
+
+      # Step 7: Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 pytest
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      # Step 8: Run the transformation script
       - name: Run transformation script
         run: |
-          python /home/runner/work/taf_dec/taf_dec/tests/table4/transformation.py
+          python /home/runner/work/taf_dec/taf_dec/taf_dec/tests/table4/transformation.py

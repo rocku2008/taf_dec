@@ -64,7 +64,10 @@ def load_credentials(env="qa"):
 
 @pytest.fixture(scope='session')
 def spark_session(request):
-    jar_path = get_jar_paths()
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    jar_dir = os.path.join(base_dir, 'jars')
+
+    jar_path = get_jar_paths()#this is for local execution
     spark = SparkSession.builder.master("local[1]") \
         .appName("pytest_framework") \
         .config("spark.jars", jar_path) \

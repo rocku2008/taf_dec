@@ -19,9 +19,10 @@ jobs:
         run: |
           ls -R
 
-      # Step 3: Check if taf_dec exists at the second level
+      # Step 3: Check if taf_dec exists at the expected path
       - name: Check if taf_dec exists in the correct path
         run: |
+          echo "Checking if taf_dec exists in /home/runner/work/taf_dec/taf_dec"
           if [ -d /home/runner/work/taf_dec/taf_dec ]; then
             echo "Directory taf_dec exists in the correct path!"
           else
@@ -29,14 +30,16 @@ jobs:
             exit 1
           fi
 
-      # Step 4: List files in taf_dec directory
+      # Step 4: List files in taf_dec directory to verify contents
       - name: List files in taf_dec directory
         run: |
+          echo "Listing files in /home/runner/work/taf_dec/taf_dec"
           ls -R /home/runner/work/taf_dec/taf_dec
 
       # Step 5: Ensure taf_dec/tests/table4 and transformation.py exist
       - name: Ensure taf_dec/tests/table4 and transformation.py exist
         run: |
+          echo "Checking for taf_dec/tests/table4 and transformation.py"
           if [ -d /home/runner/work/taf_dec/taf_dec/taf_dec/tests/table4 ] && [ -f /home/runner/work/taf_dec/taf_dec/taf_dec/tests/table4/transformation.py ]; then
             echo "taf_dec/tests/table4 and transformation.py exist!"
           else
@@ -54,4 +57,5 @@ jobs:
       # Step 8: Run the transformation script
       - name: Run transformation script
         run: |
+          echo "Running transformation script"
           python /home/runner/work/taf_dec/taf_dec/taf_dec/tests/table4/transformation.py

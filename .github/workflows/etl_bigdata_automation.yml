@@ -1,4 +1,6 @@
-name: etlbigdataautomation
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+name: ETL Automation
 
 on:
   push:
@@ -11,62 +13,19 @@ permissions:
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
+    - uses: actions/checkout@v4
     - name: Set up Python 3.10
       uses: actions/setup-python@v3
       with:
         python-version: "3.10"
-
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
-    - name: Set Spark version and download Apache Spark
-      run: |
-        # Set variables for Spark version and Hadoop version
-        SPARK_VERSION=3.4.2
-        HADOOP_VERSION=hadoop3
-        DOWNLOAD_URL=https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-${HADOOP_VERSION}.tgz
-        TARGET_DIR=$HOME/spark
-        
-        # Download Apache Spark
-        wget ${DOWNLOAD_URL} -O /tmp/spark-${SPARK_VERSION}-bin-${HADOOP_VERSION}.tgz
-        
-        # Verify if the download was successful
-        if [ $? -ne 0 ]; then
-          echo "Download failed! Please check the URL."
-          exit 1
-        fi
-        
-        # Extract Spark to the target directory
-        mkdir -p $TARGET_DIR
-        tar -xvzf /tmp/spark-${SPARK_VERSION}-bin-${HADOOP_VERSION}.tgz -C $TARGET_DIR
-        
-        # Set environment variables for Spark
-        echo "export SPARK_HOME=$TARGET_DIR/spark-${SPARK_VERSION}-bin-${HADOOP_VERSION}" >> $GITHUB_ENV
-        echo "export PATH=$SPARK_HOME/bin:$PATH" >> $GITHUB_ENV
-
-    - name: Set JARs for Spark
-      run: |
-        # Ensure SPARK_HOME environment variable is set correctly
-        echo "SPARK_HOME is $SPARK_HOME"
-        
-        # Create a directory to store JARs within the SPARK_HOME directory
-        mkdir -p $SPARK_HOME/jars
-
-        # Copy required JAR files to the Spark JARs directory
-        cp /path/to/jars/snowflake-jdbc-3.22.0.jar $SPARK_HOME/jars/
-        cp /path/to/jars/postgresql-42.2.5.jar $SPARK_HOME/jars/
-        cp /path/to/jars/azure-storage-8.6.6.jar $SPARK_HOME/jars/
-        cp /path/to/jars/hadoop-azure-3.3.1.jar $SPARK_HOME/jars/
-        cp /path/to/jars/mssql-jdbc-12.2.0.jre8.jar $SPARK_HOME/jars/
-
-    - name: Automation execution
+    - name:   Test with pytest
       run: python runner.py

@@ -35,13 +35,15 @@ jobs:
         wget https://repo1.maven.org/maven2/com/microsoft/azure/azure-storage/8.6.6/azure-storage-8.6.6.jar -P ./jars
         wget https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-azure-datalake/3.3.1/hadoop-azure-datalake-3.3.1.jar -P ./jars
         wget https://repo1.maven.org/maven2/org/postgresql/postgresql/42.2.5/postgresql-42.2.5.jar -P ./jars
+        wget https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/12.2.0.jre8/mssql-jdbc-12.2.0.jre8.jar -P ./jars
+        wget https://repo1.maven.org/maven2/net/snowflake/snowflake-jdbc/3.22.0/snowflake-jdbc-3.22.0.jar -P ./jars
 
     - name: Set Spark Configuration
       run: |
-        echo "SPARK_JARS=$(pwd)/jars/postgresql-42.2.5.jar,$(pwd)/jars/snowflake-jdbc-3.22.0.jar,$(pwd)/jars/azure-storage-8.6.6.jar,$(pwd)/jars/hadoop-azure-3.3.1.jar,$(pwd)/jars/mssql-jdbc-12.2.0.jre8.jar" >> $GITHUB_ENV
+        JAR_LIST=$(ls -1 ./jars/*.jar | paste -sd,)
+        echo "SPARK_JARS=$JAR_LIST" >> $GITHUB_ENV
 
     - name: Test with pytest
       run: |
         export PYSPARK_SUBMIT_ARGS="--jars $SPARK_JARS --driver-class-path $SPARK_JARS --conf spark.driver.extraClassPath=$SPARK_JARS --conf spark.executor.extraClassPath=$SPARK_JARS pyspark-shell"
         python runner.py
-

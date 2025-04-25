@@ -34,14 +34,6 @@ jobs:
             echo "transformation.py does NOT exist!"
             exit 1
           fi
-
-      # Cache Python dependencies (if needed)
-      - name: Cache Python dependencies (if needed)
-        uses: actions/cache@v2
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-python-${{ github.sha }}  # Force cache reset
-
       # Debug the current directory
       - name: Check current working directory
         run: pwd

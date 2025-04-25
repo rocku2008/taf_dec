@@ -10,22 +10,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout repository
+      # Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      # List the files in the root directory for debugging
+      # List files in the root directory for debugging purposes
       - name: List files in the root directory
         run: |
           ls -R
 
-
-      # List files in taf_dec/tests/table4 to verify transformation.py is there
-      - name: List files in taf_dec/tests/table4
+      # List files in the taf_dec directory for debugging
+      - name: List files in taf_dec directory
         run: |
-          ls -R taf_dec/tests/table4
+          ls -R taf_dec
 
-      # Check if the transformation.py file exists
+      # List files in the taf_dec/tests directory to check if 'table4' exists
+      - name: List files in taf_dec/tests directory
+        run: |
+          ls -R taf_dec/tests
+
+      # Check if taf_dec/tests/table4 exists
+      - name: Check if taf_dec/tests/table4 exists
+        run: |
+          if [ -d taf_dec/tests/table4 ]; then
+            echo "Directory taf_dec/tests/table4 exists!"
+          else
+            echo "Directory taf_dec/tests/table4 does NOT exist!"
+            exit 1
+          fi
+
+      # Check if transformation.py exists
       - name: Check if transformation.py exists
         run: |
           if [ -f taf_dec/tests/table4/transformation.py ]; then
@@ -34,11 +48,15 @@ jobs:
             echo "transformation.py does NOT exist!"
             exit 1
           fi
-      # Debug the current directory
-      - name: Check current working directory
-        run: pwd
 
-      # Run the Python transformation script using absolute path
+      # Cache Python dependencies (if needed)
+      - name: Cache Python dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ github.sha }}
+
+      # Run the transformation script
       - name: Run transformation script
         run: |
-          python ./taf_dec/tests/table4/transformation.py
+          python taf_dec/tests/table4/transformation.py

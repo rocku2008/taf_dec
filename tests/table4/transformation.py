@@ -3,6 +3,7 @@ from pyspark.sql.functions import lit
 import yaml
 import os
 import logging
+from pathlib import Path
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -10,26 +11,40 @@ logger = logging.getLogger(__name__)
 
 def load_credentials(env="qa"):
     """Load credentials from centralized YAML file."""
-    base_dir = os.environ.get("PROJECT_ROOT", os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    cred_path = os.path.join(base_dir, "project_config", "cred_config.yml")
+    taf_path = Path(__file__).resolve().parent.parent.parent
+    cred_path = taf_path / 'project_config' / 'cred_config.yml'
 
     logger.info(f"Loading credentials from: {cred_path}")
-    with open(cred_path, "r") as file:
-        credentials = yaml.safe_load(file)
-    return credentials[env]
+    try:
+        with open(cred_path, "r") as file:
+            credentials = yaml.safe_load(file)
+        return credentials[env]
+    except FileNotFoundError:
+        logger.error(f"Credentials file not found at {cred_path}")
+        raise  # Re-raise the exception to signal failure to the caller
+    except yaml.YAMLError as e:
+        logger.error(f"Error parsing YAML in {cred_path}: {e}")
+        raise  # Re-raise
+    except KeyError as e:
+        logger.error(f"Environment '{env}' not found in credentials file.")
+        raise
 
 def get_jar_path():
-    """Get path to required JAR files from env or default fallback."""
-    return os.environ.get("POSTGRES_JAR", os.path.join(os.getcwd(), "jars", "postgresql-42.2.5.jar"))
+    """Get path to required JAR files."""
+    # changed this to be relative
+    project_root = Path(__file__).resolve().parent.parent.parent
+    jar_path = project_root / "jars" / "postgresql-42.2.5.jar"
+    if not jar_path.exists():
+        logger.error(f"PostgreSQL JAR not found at {jar_path}")
+        raise FileNotFoundError(f"PostgreSQL JAR not found at {jar_path}")
+    return str(jar_path)
 
-def get_input_file_path():
-    """Get CSV input path from env or default fallback."""
-    return os.environ.get("CUSTOMERS_CSV", os.path.join(os.getcwd(), "input_files", "customers.csv"))
 
-def main():
+
+def get_spark_session():
+    """Gets or creates a SparkSession with the PostgreSQL JAR."""
     jar_path = get_jar_path()
     logger.info(f"Using PostgreSQL JAR: {jar_path}")
-
     spark = SparkSession.builder \
         .master("local[*]") \
         .appName("pytest_framework_transformation") \
@@ -37,39 +52,63 @@ def main():
         .config("spark.driver.extraClassPath", jar_path) \
         .config("spark.executor.extraClassPath", jar_path) \
         .getOrCreate()
+    return spark
 
-    env = os.environ.get("ENV", "qa")
-    creds = load_credentials(env)["postgres"]
+def main():
+    """Main function to run the data transformation."""
+    spark = get_spark_session()
+    try:
+        env = os.environ.get("ENV", "qa")
+        creds = load_credentials(env)["postgres"]  # Get postgres credentials
+    except Exception as e:
+        logger.error(f"Failed to load credentials: {e}")
+        spark.stop()
+        raise  # Re-raise to cause non-zero exit
 
     logger.info("Reading from PostgreSQL source table...")
-    source1 = spark.read.format("jdbc") \
-        .option("url", creds["url"]) \
-        .option("user", creds["user"]) \
-        .option("password", creds["password"]) \
-        .option("query", "SELECT id, first_name FROM employees") \
-        .option("driver", creds["driver"]) \
-        .load()
+    try:
+        source1 = spark.read.format("jdbc") \
+            .option("url", creds["url"]) \
+            .option("user", creds["user"]) \
+            .option("password", creds["password"]) \
+            .option("query", "SELECT id, first_name FROM employees") \
+            .option("driver", creds["driver"]) \
+            .load()
+    except Exception as e:
+        logger.error(f"Failed to read from PostgreSQL: {e}")
+        spark.stop()
+        raise
 
     source1 = source1.withColumn("source_id", lit("postgres"))
 
-    customers_csv_path = get_input_file_path()
-    logger.info(f"Reading customer CSV from: {customers_csv_path}")
-    source2 = spark.read.csv(customers_csv_path, header=True, inferSchema=True) \
-        .select("id", "first_name") \
-        .withColumn("source_id", lit("file"))
+    csv_path = Path(__file__).resolve().parent.parent.parent / "input_files" / "customers.csv"
+    logger.info(f"Reading customer CSV from: {csv_path}")
+    try:
+        source2 = spark.read.csv(str(csv_path), header=True, inferSchema=True) \
+            .select("id", "first_name") \
+            .withColumn("source_id", lit("file"))
+    except Exception as e:
+        logger.error(f"Failed to read CSV file: {e}")
+        spark.stop()
+        raise
 
     logger.info("Union of PostgreSQL and CSV data...")
     combined = source1.unionByName(source2)
 
     logger.info("Writing combined data to employees_expected table...")
-    combined.write.mode("overwrite") \
-        .format("jdbc") \
-        .option("url", creds["url"]) \
-        .option("user", creds["user"]) \
-        .option("password", creds["password"]) \
-        .option("dbtable", "employees_expected") \
-        .option("driver", creds["driver"]) \
-        .save()
+    try:
+        combined.write.mode("overwrite") \
+            .format("jdbc") \
+            .option("url", creds["url"]) \
+            .option("user", creds["user"]) \
+            .option("password", creds["password"]) \
+            .option("dbtable", "employees_expected") \
+            .option("driver", creds["driver"]) \
+            .save()
+    except Exception as e:
+        logger.error(f"Failed to write to PostgreSQL table: {e}")
+        spark.stop()
+        raise # important: re raise
 
     logger.info("Data transformation complete.")
     spark.stop()

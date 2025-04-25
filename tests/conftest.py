@@ -1,40 +1,73 @@
-import sys
 import os
-from pyspark.sql import SparkSession
+import sys
+import json
+
 import pytest
 import yaml
-import json
-from pyspark.sql.types import StructType
-from src.utility.general_utility import flatten
 import subprocess
-import platform
+from pyspark.sql import SparkSession
+from pyspark.sql.types import StructType
+from pathlib import Path
+from src.utility.general_utility import flatten
 
-def get_jar_path():
-    base_jar_dir = os.environ.get('SPARK_JAR_DIR', os.path.join(os.getcwd(), 'jars'))
+# Disable .pyc generation
+sys.dont_write_bytecode = True
 
-    jars = {
-        "snowflake": "snowflake-jdbc-3.22.0.jar",
-        "postgres": "postgresql-42.2.5.jar",
-        "azure_storage": "azure-storage-8.6.6.jar",
-        "hadoop_azure": "hadoop-azure-3.3.1.jar",
-        "sql_server": "mssql-jdbc-12.2.0.jre8.jar"
-    }
 
-    jar_paths = [os.path.join(base_jar_dir, jar) for jar in jars.values()]
-    return ",".join(jar_paths)
+def resolve_path(relative_path, base_dir=None):
+    """Resolve file paths, handling both local and remote."""
+    if relative_path.startswith(("abfss://", "wasbs://", "s3a://", "gs://", "adl://", "dbfs:/")):
+        return relative_path
+
+    # Else treat as local path
+    if base_dir is None:
+        base_dir = Path(__file__).resolve().parent.parent
+    abs_path = (base_dir / relative_path).resolve()
+    return abs_path.as_uri()
+
+
+def load_credentials(env="qa"):
+    """Load credentials from the centralized YAML file."""
+    project_root = Path(__file__).resolve().parent.parent
+    credentials_path = project_root / 'project_config' / 'cred_config.yml'
+    # taf_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    # credentials_path = os.path.join(taf_path, 'project_config', 'cred_config.yml')
+
+    with open(credentials_path, "r") as file:
+        credentials = yaml.safe_load(file)
+        print(credentials[env])
+    return credentials[env]
+
 
 @pytest.fixture(scope='session')
 def spark_session(request):
-    jar_path = get_jar_path()
-    spark = SparkSession.builder.master("local[*]") \
+    """Creates a SparkSession for testing."""
+    # Determine the project root directory dynamically
+    project_root = Path(__file__).resolve().parent.parent
+
+    # Construct the path to the JARs directory.  Crucially, this assumes 'jars' is at the root.
+    jars_root_dir = project_root / 'jars'
+
+    snowflake_jar = str(jars_root_dir / 'snowflake-jdbc-3.22.0.jar')
+    postgresql_jar = str(jars_root_dir / 'postgresql-42.2.5.jar')
+    azure_storage_jar = str(jars_root_dir / 'azure-storage-8.6.6.jar')
+    hadoop_azure_jar = str(jars_root_dir / 'hadoop-azure-3.3.1.jar')
+    mssql_jar = str(jars_root_dir / 'mssql-jdbc-12.2.0.jre8.jar')
+
+    # Construct the spark.jars string with the correct absolute paths
+    jar_path = f"{snowflake_jar},{postgresql_jar},{azure_storage_jar},{hadoop_azure_jar},{mssql_jar}"
+
+    spark = SparkSession.builder.master("local[1]") \
         .appName("pytest_framework") \
         .config("spark.jars", jar_path) \
         .config("spark.driver.extraClassPath", jar_path) \
         .config("spark.executor.extraClassPath", jar_path) \
+        .config("spark.hadoop.fs.azure", "org.apache.hadoop.fs.azure.NativeAzureFileSystem") \
+        .config("spark.hadoop.fs.azurebfs.impl", "org.apache.hadoop.fs.azurebfs.SecureAzureBlobFileSystem") \
         .getOrCreate()
 
-    env = os.environ.get('ENV', 'qa')
-    cred = load_credentials(env)['adls']
+    # Set ADLS credentials if needed
+    cred = load_credentials('qa')['adls']
     adls_account_name = cred['adls_account_name']
     key = cred['key']
     spark.conf.set(f"fs.azure.account.auth.type.{adls_account_name}.dfs.core.windows.net", "SharedKey")
@@ -42,85 +75,107 @@ def spark_session(request):
 
     return spark
 
+
 @pytest.fixture(scope='module')
 def read_config(request):
-    dir_path = os.path.dirname(request.node.fspath)
+    dir_path = os.path.dirname(str(request.node.fspath))
     config_path = os.path.join(dir_path, 'config.yml')
     with open(config_path, 'r') as f:
         config_data = yaml.safe_load(f)
     return config_data
 
+
 def read_schema(dir_path):
     schema_path = os.path.join(dir_path, 'schema.json')
-    with open(schema_path, 'r') as f:
-        return StructType.fromJson(json.load(f))
+    with open(schema_path, 'r') as schema_file:
+        schema = StructType.fromJson(json.load(schema_file))
+    return schema
+
 
 def read_query(dir_path):
-    sql_path = os.path.join(dir_path, 'transformation.sql')
-    with open(sql_path, 'r') as f:
-        return f.read()
+    sql_query_path = os.path.join(dir_path, 'transformation.sql')
+    with open(sql_query_path, "r") as file:
+        sql_query = file.read()
+    return sql_query
+
 
 def read_file(config_data, spark, dir_path):
-    df = None
+    file_uri = resolve_path(config_data['path'])
+    abs_path = file_uri
     if config_data['type'] == 'csv':
-        schema = read_schema(dir_path) if config_data.get('schema') == 'Y' else None
-        df = spark.read.schema(schema).csv(config_data['path'], header=config_data['options']['header']) if schema \
-            else spark.read.csv(config_data['path'], header=config_data['options']['header'], inferSchema=True)
+        if config_data['schema'] == 'Y':
+            schema = read_schema(dir_path)
+            df = spark.read.schema(schema).csv(abs_path, header=config_data['options']['header'])
+        else:
+            df = spark.read.csv(abs_path, header=config_data['options']['header'], inferSchema=True)
     elif config_data['type'] == 'json':
-        df = spark.read.json(config_data['path'], multiLine=config_data['options']['multiline'])
+        df = spark.read.json(abs_path, multiLine=config_data['options'].get('multiline', False))
         df = flatten(df)
     elif config_data['type'] == 'parquet':
-        df = spark.read.parquet(config_data['path'])
+        df = spark.read.parquet(abs_path)
     elif config_data['type'] == 'avro':
-        df = spark.read.format('avro').load(config_data['path'])
+        df = spark.read.format('avro').load(abs_path)
+    else:
+        raise ValueError(f"Unsupported file type: {config_data['type']}")
     return df
 
+
 def read_db(config_data, spark, dir_path):
-    creds = load_credentials()[config_data['cred_lookup']]
+    creds = load_credentials()
+    cred_lookup = config_data['cred_lookup']
+    creds = creds[cred_lookup]
+    print("Database credentials:", creds)
+
     if config_data['transformation'][0].lower() == 'y' and config_data['transformation'][1].lower() == 'sql':
         sql_query = read_query(dir_path)
-        df = spark.read.format("jdbc") \
-            .option("url", creds['url']) \
-            .option("user", creds['user']) \
-            .option("password", creds['password']) \
-            .option("query", sql_query) \
-            .option("driver", creds['driver']) \
-            .load()
+        print("SQL Query:", sql_query)
+        df = spark.read.format("jdbc"). \
+            option("url", creds['url']). \
+            option("user", creds['user']). \
+            option("password", creds['password']). \
+            option("query", sql_query). \
+            option("driver", creds['driver']).load()
+
     else:
-        df = spark.read.format("jdbc") \
-            .option("url", creds['url']) \
-            .option("user", creds['user']) \
-            .option("password", creds['password']) \
-            .option("dbtable", config_data['table']) \
-            .option("driver", creds['driver']) \
-            .load()
+        df = spark.read.format("jdbc"). \
+            option("url", creds['url']). \
+            option("user", creds['user']). \
+            option("password", creds['password']). \
+            option("dbtable", config_data['table']). \
+            option("driver", creds['driver']).load()
     return df
+
 
 @pytest.fixture(scope='module')
 def read_data(read_config, spark_session, request):
     spark = spark_session
     config_data = read_config
-    dir_path = os.path.dirname(request.node.fspath)
+    dir_path = os.path.dirname(str(request.node.fspath))
+
     source_config = config_data['source']
     target_config = config_data['target']
 
-    if source_config['type'] == 'database' and source_config['transformation'][1].lower() == 'python':
-        transformation_path = os.path.join(dir_path, 'transformation.py')
-        subprocess.run([sys.executable, transformation_path], check=True)
+    if source_config['type'] == 'database':
+        if source_config['transformation'][1].lower() == 'python' and source_config['transformation'][0].lower() == 'y':
+            python_file_path = os.path.join(dir_path, 'transformation.py')
+            print("Running Python transformation:", python_file_path)
 
-    source_df = read_db(source_config, spark, dir_path) if source_config['type'] == 'database' \
-        else read_file(source_config, spark, dir_path)
-    target_df = read_db(target_config, spark, dir_path) if target_config['type'] == 'database' \
-        else read_file(target_config, spark, dir_path)
+            subprocess.run([sys.executable, python_file_path], check=True)
+        source = read_db(config_data=source_config, spark=spark, dir_path=dir_path)
+    else:
+        source = read_file(config_data=source_config, spark=spark, dir_path=dir_path)
 
-    return source_df.drop(*source_config['exclude_cols']), target_df.drop(*target_config['exclude_cols'])
+    if target_config['type'] == 'database':
+        target = read_db(config_data=target_config, spark=spark, dir_path=dir_path)
+    else:
+        target = read_file(config_data=target_config, spark=spark, dir_path=dir_path)
 
-def load_credentials(env="qa"):
-    taf_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    cred_path = os.path.join(taf_path, 'project_config', 'cred_config.yml')
-    with open(cred_path, 'r') as f:
-        credentials = yaml.safe_load(f)
-    return credentials[env]
+    print("Target exclude columns:", target_config['exclude_cols'])
+
+    return (
+        source.drop(*source_config['exclude_cols']),
+        target.drop(*target_config['exclude_cols'])
+    )
 
 
 

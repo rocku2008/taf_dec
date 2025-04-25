@@ -61,6 +61,7 @@ def load_credentials(env="qa"):
     return credentials[env]
 
 
+
 @pytest.fixture(scope='session')
 def spark_session(request):
     jar_path = get_jar_paths()

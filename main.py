@@ -6,10 +6,10 @@
 # #subprocess.run(["python", "C:\\Users\\souls\\PycharmProjects\\MyProj\\taf_dec\\tests\\table4\\transformation.py"])
 # subprocess.run([sys.executable,"C:\\Users\\souls\\PycharmProjects\\MyProj\\taf_dec\\tests\\table4\\transformation.py"])
 
-# from pyspark.sql import SparkSession
+#from pyspark.sql import SparkSession
 # from src.utility.general_utility import flatten
 # # Initialize Spark session
-# spark = (SparkSession.builder.master("local[2]")
+#spark = (SparkSession.builder.master("local[2]")
 
 #         .config("spark.jars", "C:\\Users\\souls\\PycharmProjects\\MyProj\\taf_dec\\jars\\postgresql-42.2.5.jar")
 #         .appName("pytest_framework")
@@ -18,15 +18,26 @@
 #
 #
 #
-#
+from pyspark.sql import SparkSession
+azure_storage = 'C:\\Users\\souls\\PycharmProjects\\MyProj\\taf_dec\\jars\\azure-storage-8.6.6.jar'
+hadoop_azure = 'C:\\Users\\souls\\PycharmProjects\\MyProj\\taf_dec\\jars\\hadoop-azure-3.3.1.jar'
+sql_server = 'C:\\Users\\souls\\PycharmProjects\\MyProj\\taf_dec\\jars\\mssql-jdbc-12.2.0.jre8.jar'
+postgres = 'C:\\Users\\souls\\PycharmProjects\\MyProj\\taf_dec\\jars\\postgresql-42.2.5.jar'
+jar_path =  azure_storage + ',' + hadoop_azure + ',' + sql_server +  ',' + postgres
+spark = SparkSession.builder.master("local[*]") \
+        .appName("pytest_framework") \
+        .config("spark.jars", jar_path) \
+        .config("spark.driver.extraClassPath", jar_path) \
+        .config("spark.executor.extraClassPath", jar_path) \
+        .getOrCreate()
 # #reading data from postgresql db in pyspark#
-# df = (spark.read.format('jdbc').
-#       option('url', "jdbc:postgresql://localhost:5432/postgres").
-#       option('user','postgres').
-#       option('password', 'Iphone9@').
-#       option('dbtable', 'customer').
-#       option('driver', "org.postgresql.Driver").load())
-# df.show()
+df = (spark.read.format('jdbc').
+      option('url', "jdbc:postgresql://localhost:5432/postgres").
+      option('user','postgres').
+      option('password', 'Iphone9@').
+      option('dbtable', 'customer').
+      option('driver', "org.postgresql.Driver").load())
+df.show()
 
 
 # from pyspark.sql import SparkSession

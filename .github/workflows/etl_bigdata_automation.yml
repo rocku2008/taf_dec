@@ -26,6 +26,4 @@ jobs:
           key: ${{ runner.os }}-python-${{ github.sha }}  # Force cache reset
 
       - name: Run transformation script
-        run: |
-          cd taf_dec/tests/table4
-          python3 transformation.py
+        run: python taf_dec/tests/table4/transformation.py

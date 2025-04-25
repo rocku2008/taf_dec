@@ -53,7 +53,7 @@ jobs:
 
     - name: Download necessary JARs
       run: |
-        # Create a directory to store JARs
+        # Create a directory to store JARs within the SPARK_HOME directory
         mkdir -p $SPARK_HOME/jars
 
         # Download all necessary JARs

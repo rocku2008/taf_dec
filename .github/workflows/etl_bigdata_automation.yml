@@ -28,9 +28,11 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         pip install pyspark azure-storage-blob pyodbc
 
+    - name: Create jars directory
+      run: mkdir -p ./jars
+
     - name: Download JARs
       run: |
-        mkdir -p ./jars
         wget https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-azure/3.3.1/hadoop-azure-3.3.1.jar -P ./jars
         wget https://repo1.maven.org/maven2/com/microsoft/azure/azure-storage/8.6.6/azure-storage-8.6.6.jar -P ./jars
         wget https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-azure-datalake/3.3.1/hadoop-azure-datalake-3.3.1.jar -P ./jars
@@ -38,12 +40,5 @@ jobs:
         wget https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/12.2.0.jre8/mssql-jdbc-12.2.0.jre8.jar -P ./jars
         wget https://repo1.maven.org/maven2/net/snowflake/snowflake-jdbc/3.22.0/snowflake-jdbc-3.22.0.jar -P ./jars
 
-    - name: Set Spark Configuration
-      run: |
-        JAR_LIST=$(ls -1 ./jars/*.jar | paste -sd,)
-        echo "SPARK_JARS=$JAR_LIST" >> $GITHUB_ENV
-
     - name: Test with pytest
-      run: |
-        export PYSPARK_SUBMIT_ARGS="--jars $SPARK_JARS --driver-class-path $SPARK_JARS --conf spark.driver.extraClassPath=$SPARK_JARS --conf spark.executor.extraClassPath=$SPARK_JARS pyspark-shell"
-        python runner.py
+      run: python runner.py

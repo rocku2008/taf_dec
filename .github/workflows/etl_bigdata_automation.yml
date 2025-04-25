@@ -38,10 +38,10 @@ jobs:
 
       - name: Download Apache Spark
         run: |
-          curl -O https://downloads.apache.org/spark/spark-3.4.1/spark-3.4.1-bin-hadoop3.tgz
-          tar xzf spark-3.4.1-bin-hadoop3.tgz
-          echo "SPARK_HOME=$PWD/spark-3.4.1-bin-hadoop3" >> $GITHUB_ENV
-          echo "$PWD/spark-3.4.1-bin-hadoop3/bin" >> $GITHUB_PATH
+          curl -O https://downloads.apache.org/spark/spark-3.4.4/spark-3.4.4-bin-hadoop3.tgz
+          tar xzf spark-3.4.4-bin-hadoop3.tgz
+          echo "SPARK_HOME=$PWD/spark-3.4.4-bin-hadoop3" >> $GITHUB_ENV
+          echo "$PWD/spark-3.4.4-bin-hadoop3/bin" >> $GITHUB_PATH
 
       - name: Verify Spark Installation
         run: |

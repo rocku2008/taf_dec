@@ -21,12 +21,15 @@ project_root = Path(__file__).resolve().parent.parent
 postgres_jar = project_root / 'jars' / 'postgresql-42.2.5.jar'
 
 jar_path = str(postgres_jar)
+jar_dir = str(postgres_jar.parent)
+
 spark = SparkSession.builder.master("local[1]") \
     .appName("pytest_framework") \
     .config("spark.jars", jar_path) \
     .config("spark.driver.extraClassPath", jar_path) \
     .config("spark.executor.extraClassPath", jar_path) \
-    .config("spark.driver.extraLibraryPath", str(postgres_jar.parent)) \
+    .config("spark.driver.extraLibraryPath", jar_dir) \
+    .config("spark.executor.extraLibraryPath", jar_dir) \
     .getOrCreate()
 
 # Load credentials (can override env using ENV variable)

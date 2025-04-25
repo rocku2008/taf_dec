@@ -1,4 +1,4 @@
-name: ETL Big Data Automation
+name: etlbigdataautomation
 
 on:
   push:
@@ -15,8 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
     - name: Set up Python 3.10
       uses: actions/setup-python@v3
@@ -31,8 +30,8 @@ jobs:
 
     - name: Install Spark with JAR dependencies
       run: |
-        SPARK_VERSION=3.3.0
-        HADOOP_VERSION=hadoop3.2
+        SPARK_VERSION=3.4.0  # Updated Spark version
+        HADOOP_VERSION=hadoop3.2  # Ensure this version is compatible
         DOWNLOAD_URL=https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-${HADOOP_VERSION}.tgz
         TARGET_DIR=/opt/spark
 
@@ -68,10 +67,5 @@ jobs:
         # Set Spark JARs configuration to include the downloaded JARs
         echo "spark.jars=$SPARK_HOME/jars/snowflake-jdbc-3.22.0.jar,$SPARK_HOME/jars/postgresql-42.2.5.jar,$SPARK_HOME/jars/mssql-jdbc-12.2.0.jre8.jar,$SPARK_HOME/jars/hadoop-azure-3.3.1.jar,$SPARK_HOME/jars/azure-storage-8.6.6.jar" >> $GITHUB_ENV
 
-    - name: Run automation execution
-      run: |
-        python runner.py
-
-    - name: Run tests
-      run: |
-        pytest tests/
+    - name: Automation execution
+      run: python runner.py

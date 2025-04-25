@@ -11,10 +11,12 @@ permissions:
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
     - name: Set up Python 3.10
       uses: actions/setup-python@v3
@@ -27,10 +29,9 @@ jobs:
         pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-    - name: Download and Install Apache Spark
+    - name: Install Spark with JAR dependencies
       run: |
-        # Set variables for Spark version and Hadoop version
-        SPARK_VERSION=3.2.1
+        SPARK_VERSION=3.3.0
         HADOOP_VERSION=hadoop3.2
         DOWNLOAD_URL=https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-${HADOOP_VERSION}.tgz
         TARGET_DIR=/opt/spark
@@ -51,29 +52,26 @@ jobs:
         echo "export SPARK_HOME=/opt/spark/spark-${SPARK_VERSION}-bin-${HADOOP_VERSION}" >> $GITHUB_ENV
         echo "export PATH=$SPARK_HOME/bin:$PATH" >> $GITHUB_ENV
 
-    - name: Download necessary JARs
-      run: |
-        # Create a directory to store JARs in the /tmp directory
-        mkdir -p /tmp/spark_jars
+        # Create directories for JARs
+        mkdir -p $SPARK_HOME/jars
 
-        # Download all necessary JARs
-        wget https://repo1.maven.org/maven2/net/snowflake/snowflake-jdbc/3.22.0/snowflake-jdbc-3.22.0.jar -P /tmp/spark_jars/
-        wget https://repo1.maven.org/maven2/org/postgresql/postgresql/42.2.5/postgresql-42.2.5.jar -P /tmp/spark_jars/
-        wget https://repo1.maven.org/maven2/com/microsoft/azure/azure-storage/8.6.6/azure-storage-8.6.6.jar -P /tmp/spark_jars/
-        wget https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-azure/3.3.1/hadoop-azure-3.3.1.jar -P /tmp/spark_jars/
-        wget https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/12.2.0.jre8/mssql-jdbc-12.2.0.jre8.jar -P /tmp/spark_jars/
+        # Download required JARs in parallel using background processes
+        wget https://repo1.maven.org/maven2/net/snowflake/snowflake-jdbc/3.22.0/snowflake-jdbc-3.22.0.jar -P $SPARK_HOME/jars/ &
+        wget https://repo1.maven.org/maven2/org/postgresql/postgresql/42.2.5/postgresql-42.2.5.jar -P $SPARK_HOME/jars/ &
+        wget https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/12.2.0.jre8/mssql-jdbc-12.2.0.jre8.jar -P $SPARK_HOME/jars/ &
+        wget https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-azure/3.3.1/hadoop-azure-3.3.1.jar -P $SPARK_HOME/jars/ &
+        wget https://repo1.maven.org/maven2/com/microsoft/azure/azure-storage/8.6.6/azure-storage-8.6.6.jar -P $SPARK_HOME/jars/ &
 
-    - name: Set Spark configurations for JARs and Azure Storage
-      run: |
-        # Configure Spark to use the downloaded JARs
-        echo "export SPARK_CONF_DIR=$SPARK_HOME/conf" >> $GITHUB_ENV
-        echo "spark.jars=$(find /tmp/spark_jars -type f | tr '\n' ',')" >> $GITHUB_ENV
-        
-        # Add configurations for Azure Blob Storage
-        echo "spark.hadoop.fs.azure=org.apache.hadoop.fs.azure.NativeAzureFileSystem" >> $GITHUB_ENV
-        echo "spark.hadoop.fs.azurebfs=org.apache.hadoop.fs.azurebfs.SecureAzureBlobFileSystem" >> $GITHUB_ENV
-        echo "spark.hadoop.fs.azure.account.key.<your-storage-account-name>.blob.core.windows.net=<your-account-key>" >> $GITHUB_ENV
+        # Wait for all downloads to complete
+        wait
 
-    - name: Automation execution
+        # Set Spark JARs configuration to include the downloaded JARs
+        echo "spark.jars=$SPARK_HOME/jars/snowflake-jdbc-3.22.0.jar,$SPARK_HOME/jars/postgresql-42.2.5.jar,$SPARK_HOME/jars/mssql-jdbc-12.2.0.jre8.jar,$SPARK_HOME/jars/hadoop-azure-3.3.1.jar,$SPARK_HOME/jars/azure-storage-8.6.6.jar" >> $GITHUB_ENV
+
+    - name: Run automation execution
       run: |
         python runner.py
+
+    - name: Run tests
+      run: |
+        pytest tests/

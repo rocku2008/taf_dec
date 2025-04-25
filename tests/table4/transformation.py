@@ -26,6 +26,7 @@ spark = SparkSession.builder.master("local[1]") \
     .config("spark.jars", jar_path) \
     .config("spark.driver.extraClassPath", jar_path) \
     .config("spark.executor.extraClassPath", jar_path) \
+    .config("spark.driver.extraLibraryPath", str(postgres_jar.parent)) \
     .getOrCreate()
 
 # Load credentials (can override env using ENV variable)
@@ -59,7 +60,6 @@ source = source1.unionAll(source2)
     .option("dbtable", "employees_expected")
     .option("driver", creds['driver'])
     .save())
-
 
 
 

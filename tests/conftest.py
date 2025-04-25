@@ -66,18 +66,19 @@ def load_credentials(env="qa"):
 
 @pytest.fixture(scope='session')
 def spark_session(request):
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    jars_dir_name = 'jars'
-    jars_dir = os.path.join(base_dir, jars_dir_name)
 
     #jar_path = get_jar_paths()#this is for local execution
-    snowflake_jar = os.path.join(jars_dir, 'snowflake-jdbc-3.22.0.jar')
-    postgresql_jar = os.path.join(jars_dir, 'postgresql-42.2.5.jar')
-    azure_storage_jar = os.path.join(jars_dir, 'azure-storage-8.6.6.jar')
-    hadoop_azure_jar = os.path.join(jars_dir, 'hadoop-azure-3.3.1.jar')
-    mssql_jar = os.path.join(jars_dir, 'mssql-jdbc-12.2.0.jre8.jar')
+    project_root = Path(__file__).resolve().parent.parent
+    # Construct the path to the JARs directory.  Crucially, this assumes 'jars' is at the root.
+    jars_root_dir = project_root / 'jars'
 
-    # Construct the spark.jars string
+    snowflake_jar = str(jars_root_dir / 'snowflake-jdbc-3.22.0.jar')
+    postgresql_jar = str(jars_root_dir / 'postgresql-42.2.5.jar')
+    azure_storage_jar = str(jars_root_dir / 'azure-storage-8.6.6.jar')
+    hadoop_azure_jar = str(jars_root_dir / 'hadoop-azure-3.3.1.jar')
+    mssql_jar = str(jars_root_dir / 'mssql-jdbc-12.2.0.jre8.jar')
+
+    # Construct the spark.jars string with the correct absolute paths
     jar_path = f"{snowflake_jar},{postgresql_jar},{azure_storage_jar},{hadoop_azure_jar},{mssql_jar}"
 
     spark = SparkSession.builder.master("local[1]") \

@@ -15,22 +15,23 @@ def load_credentials(env="qa"):
         print(credentials[env])
     return credentials[env]
 
+def get_spark_session():
+    """Gets or creates a SparkSession."""
+    spark = SparkSession.builder.appName("DataTransformation") \
+        .getOrCreate()
+    return spark
 
-# Dynamically resolve the JAR path
-project_root = Path(__file__).resolve().parent.parent
-postgres_jar = project_root / 'jars' / 'postgresql-42.2.5.jar'
+# Get spark session
+spark = get_spark_session()
 
-jar_path = str(postgres_jar)
-jar_dir = str(postgres_jar.parent)
-
-spark = SparkSession.builder.master("local[1]") \
-    .appName("pytest_framework") \
-    .config("spark.jars", jar_path) \
-    .config("spark.driver.extraClassPath", jar_path) \
-    .config("spark.executor.extraClassPath", jar_path) \
-    .config("spark.driver.extraLibraryPath", jar_dir) \
-    .config("spark.executor.extraLibraryPath", jar_dir) \
-    .getOrCreate()
+# spark = SparkSession.builder.master("local[1]") \
+#     .appName("pytest_framework") \
+#     .config("spark.jars", jar_path) \
+#     .config("spark.driver.extraClassPath", jar_path) \
+#     .config("spark.executor.extraClassPath", jar_path) \
+#     .config("spark.driver.extraLibraryPath", jar_dir) \
+#     .config("spark.executor.extraLibraryPath", jar_dir) \
+#     .getOrCreate()
 
 # Load credentials (can override env using ENV variable)
 env = os.getenv("ENV", "qa")
@@ -48,6 +49,7 @@ source1 = spark.read.format("jdbc"). \
 source1 = source1.withColumn('source_id', lit('postgres'))
 
 # Read from CSV (dynamically resolve path)
+project_root = Path(__file__).resolve().parent.parent
 csv_path = project_root / "input_files" / "customers.csv"
 source2 = spark.read.csv(str(csv_path), header=True, inferSchema=True)
 source2 = source2.select("id", 'first_name').withColumn('source_id', lit('file'))

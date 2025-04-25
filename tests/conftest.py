@@ -30,10 +30,23 @@ def get_jar_paths():
     return ",".join(jars)
 
 def resolve_path(relative_path, base_dir=None):
+    # Return as-is if it's a URI (cloud, DBFS, or remote path)
+    if relative_path.startswith(("abfss://", "wasbs://", "s3a://", "gs://", "adl://", "dbfs:/")):
+        return relative_path
+
+    # Else treat as local path
     if base_dir is None:
         base_dir = Path(__file__).resolve().parent.parent
     abs_path = (base_dir / relative_path).resolve()
     return abs_path.as_uri()
+
+
+
+# def resolve_path(relative_path, base_dir=None):
+#     if base_dir is None:
+#         base_dir = Path(__file__).resolve().parent.parent
+#     abs_path = (base_dir / relative_path).resolve()
+#     return abs_path.as_uri()
 
 
 

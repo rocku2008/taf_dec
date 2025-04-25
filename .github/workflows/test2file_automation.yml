@@ -1,6 +1,3 @@
-
-# This workflow will install Python dependencies, run tests and lint with a single version of Python
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
 name: ETL Automation
 
 on:
@@ -28,5 +25,22 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name:   Test with pytest
-      run: python runner1.py
+    - name: Show Current Directory
+      run: pwd
+    - name: List Files and Directories
+      run: ls -alR
+    - name: Check for transformation.py
+      run: |
+        # Change to the base directory first
+        cd taf_dec
+        # Check for the existence of the directory and the file
+        if [ -d "tests/table4" ] && [ -f "tests/table4/transformation.py" ]; then
+          echo "taf_dec/tests/table4 and transformation.py exist!"
+        else
+          echo "taf_dec/tests/table4 or transformation.py does NOT exist!"
+          exit 1
+        fi
+      shell: /usr/bin/bash -e
+    - name: Test with pytest
+      run: python runner2.py
+      shell: /usr/bin/bash -e

@@ -1,0 +1,61 @@
+name: Run Transformation Script
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v2  # Using v2 for checking out the repository
+
+      # Step 2: List the files in the workspace for debugging
+      - name: List files in the root directory
+        run: |
+          ls -R
+
+      # Step 3: Check if taf_dec exists at the expected path
+      - name: Check if taf_dec exists in the correct path
+        run: |
+          echo "Checking if taf_dec exists in /home/runner/work/taf_dec/taf_dec"
+          if [ -d /home/runner/work/taf_dec/taf_dec ]; then
+            echo "Directory taf_dec exists in the correct path!"
+          else
+            echo "Directory taf_dec does NOT exist in the expected path!"
+            exit 1
+          fi
+
+      # Step 4: List files in taf_dec directory to verify contents
+      - name: List files in taf_dec directory
+        run: |
+          echo "Listing files in /home/runner/work/taf_dec/taf_dec"
+          ls -R /home/runner/work/taf_dec/taf_dec
+
+      # Step 5: Ensure taf_dec/tests/table4 and transformation.py exist
+      - name: Ensure taf_dec/tests/table4 and transformation.py exist
+        run: |
+          echo "Checking for taf_dec/tests/table4 and transformation.py"
+          if [ -d /home/runner/work/taf_dec/taf_dec/taf_dec/tests/table4 ] && [ -f /home/runner/work/taf_dec/taf_dec/taf_dec/tests/table4/transformation.py ]; then
+            echo "taf_dec/tests/table4 and transformation.py exist!"
+          else
+            echo "taf_dec/tests/table4 or transformation.py does NOT exist!"
+            exit 1
+          fi
+
+      # Step 7: Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 pytest
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      # Step 8: Run the transformation script
+      - name: Run transformation script
+        run: |
+          echo "Running transformation script"
+          python /home/runner/work/taf_dec/taf_dec/taf_dec/tests/table4/transformation.py

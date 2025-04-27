@@ -14,13 +14,19 @@
     },
     {
       "metadata": {},
+      "name": "email",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
       "name": "phone",
       "nullable": true,
       "type": "string"
     },
     {
       "metadata": {},
-      "name": "batch_id",
+      "name": "batchid",
       "nullable": true,
       "type": "string"
     }

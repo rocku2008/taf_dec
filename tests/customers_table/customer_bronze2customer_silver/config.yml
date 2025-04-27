@@ -1,16 +1,14 @@
 source:
-  path: "abfss://test@decauto21adls.dfs.core.windows.net/raw/customer/"
-  type: "csv"
-  schema: "Y"
-  options:
-    header: True
-    delimiter: ","
-  exclude_cols: ["created_date","updated_date","hash_key"]
+  type: "database"
+  transformation : ["y","python"]
+  table: "[dbo].[customer_silver_expected]"
+  cred_lookup: "sqlserver"
+  exclude_cols: ["created_date","updated_date","hash_key","rnk"]
 
 target:
   type: "database"
-  transformation : ["y","sql"]
-  table: "[dbo].[customers_raw]"
+  transformation : ["n","na"]
+  table: "[dbo].[customers_silver]"
   cred_lookup: "sqlserver"
   exclude_cols: ["created_date","updated_date","hash_key","rnk"]
 

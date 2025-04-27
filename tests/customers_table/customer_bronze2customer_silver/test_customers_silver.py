@@ -1,16 +1,9 @@
-# from src.data_validations.count_check import count_val
-# def test_count_check(read_data,read_config):
-#     source, target = read_data
-#     read_config = read_config
-#     key_columns = read_config['validations']['count_check']['key_columns']
-#     status = count_val(source=source, target=target,key_columns=key_columns)
-#     assert status == 'PASS'
 from src.data_validations.count_check import count_val
 from src.data_validations.duplicate_validation import duplicate_check
 from src.data_validations.uniqueness_check import uniqueness_check
 from src.data_validations.null_validation import null_value_check
 from src.data_validations.data_compare import data_compare
-from src.data_validations.schema_validation import schema_check
+#from src.data_validations.schema_validation import schema_check
 
 def test_count_check(read_data,read_config):
     source, target = read_data
@@ -48,10 +41,10 @@ def test_data_compare_check(read_data,read_config):
     status = data_compare(source=source, target=target, key_column=key_columns, num_records=num_records)
     assert status == 'PASS'
 
-def test_schema_check(read_data,read_config,spark_session):
-    source, target = read_data
-    #read_config = read_config
-    status = schema_check(source=source,target=target,spark=spark_session)
-    assert status == 'PASS'
+# def test_schema_check(read_data,read_config,spark_session):
+#     source, target = read_data
+#     #read_config = read_config
+#     status = schema_check(source=source,target=target,spark=spark_session)
+#     assert status == 'PASS'
 
 

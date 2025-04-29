@@ -1,4 +1,4 @@
-from main import postgres
+#from main import postgres
 from pyspark.sql import SparkSession
 import pytest
 import yaml

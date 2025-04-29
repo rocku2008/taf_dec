@@ -11,7 +11,7 @@ def load_credentials(env="qa"):
     #taf_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     # credentials_path = taf_path+'/project_config/cred_config.yml'
     #credentials_path= os.path.join(taf_path, "project_config", "cred_config.yml")
-    credentials_path = '/Users/admin/PycharmProjects/taf_dec/project_config/cred_config.yml'
+    credentials_path = "C:\\Users\\souls\\PycharmProjects\\MyProj\\taf_dec\\project_config\\cred_config.yml"
     with open(credentials_path, "r") as file:
         credentials = yaml.safe_load(file)
         print(credentials[env])
@@ -56,13 +56,21 @@ jdbc_properties = {
 
 bronze_df = spark.read.jdbc(url=jdbc_url, table='customers_bronze', properties=jdbc_properties).drop('hash_key')
 
+print("bronze DF count", bronze_df.count())
+
 silver_df = spark.read.jdbc(url=jdbc_url, table='customers_silver_backup', properties=jdbc_properties)
+
+print("silver DF count", silver_df.count())
 
 columns = ['customer_id','name','email','phone','batchid','created_date','updated_date']
 updates = (bronze_df.join(silver_df.select("customer_id", "created_date","batchid"), on="customer_id", how="inner").
            drop(bronze_df.created_date,bronze_df.batchid))
 
+print("updated DF count", updates.count())
+
 silver_not_in_bronze = silver_df.join(bronze_df, on="customer_id", how="left_anti")
+
+print("silver not in Bronze DF count", silver_not_in_bronze.count())
 
 new_records = bronze_df.join(silver_df, on="customer_id", how="left_anti")
 
@@ -71,4 +79,25 @@ final_df = updates.select(*columns).union(new_records.select(*columns)).union(si
 # final_df.cache()
 print("final df")
 final_df.show()
-final_df.write.jdbc(url=jdbc_url, table='customer_silver_expected', mode="overwrite", properties=jdbc_properties)
+
+# Show final DataFrame for validation
+print("Final DF schema:")
+final_df.printSchema()
+
+# Attempt to overwrite data in Azure SQL Server
+try:
+    final_df.write.jdbc(
+        url=jdbc_url,
+        table='customer_silver_expected',
+        mode='overwrite',  # Overwrite mode
+        properties=jdbc_properties
+    )
+    print("Data successfully written to customer_silver_expected.")
+except Exception as e:
+    print(f"Error writing to customer_silver_expected: {str(e)}")
+
+spark.stop()
+
+
+
+#final_df.write.jdbc(url=jdbc_url, table='customer_silver_expected', mode="overwrite", properties=jdbc_properties)

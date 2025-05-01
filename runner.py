@@ -4,6 +4,7 @@ import sys
 import sys
 sys.dont_write_bytecode = True
 
+
 def main():
     # Customize the arguments for pytest run
     pytest_args = [

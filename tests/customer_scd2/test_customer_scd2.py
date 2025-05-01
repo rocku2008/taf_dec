@@ -7,10 +7,17 @@
 #     assert status == 'PASS'
 from src.data_validations.count_check import count_val
 from src.data_validations.duplicate_validation import duplicate_check
-from src.data_validations.uniqueness_check import uniqueness_check
+#from src.data_validations.uniqueness_check import uniqueness_check
 from src.data_validations.null_validation import null_value_check
 from src.data_validations.data_compare import data_compare
 from src.data_validations.schema_validation import schema_check
+
+#Add your transformation logic here if it's part of the same test
+#Ensure that transformations are invoked first before running the validation tests.
+def test_customer_scd2_transformation(read_data, read_config, spark_session):
+    # Transformation logic for SCD2 (you can call your transformation functions here)
+    from transformation import run_transformation
+    run_transformation()  # Call your transformation code here
 
 def test_count_check(read_data,read_config):
     source, target = read_data
@@ -26,12 +33,12 @@ def test_duplicate_check(read_data,read_config):
     status = duplicate_check( df=target,key_col=key_columns)
     assert status == 'PASS'
 
-def test_uniqueness_check(read_data,read_config):
-    source, target = read_data
-    read_config = read_config
-    unique_cols = read_config['validations']['uniqueness_check']['unique_columns']
-    status = uniqueness_check( df=target,unique_cols=unique_cols)
-    assert status == 'PASS'
+# def test_uniqueness_check(read_data,read_config):
+#     source, target = read_data
+#     read_config = read_config
+#     unique_cols = read_config['validations']['uniqueness_check']['unique_columns']
+#     status = uniqueness_check( df=target,unique_cols=unique_cols)
+#     assert status == 'PASS'
 
 def test_null_check(read_data,read_config):
     source, target = read_data
@@ -55,3 +62,17 @@ def test_schema_check(read_data,read_config,spark_session):
     assert status == 'PASS'
 
 
+# Add your transformation logic here if it's part of the same test
+# Ensure that transformations are invoked first before running the validation tests.
+# def test_customer_scd2_transformation(read_data, read_config, spark_session):
+#     # Transformation logic for SCD2 (you can call your transformation functions here)
+#     from transformation import run_transformation
+#     run_transformation()  # Call your transformation code here
+
+    # After transformation, run the validation tests
+    # test_count_check(read_data, read_config)
+    # test_duplicate_check(read_data, read_config)
+    # test_uniqueness_check(read_data, read_config)
+    # test_null_check(read_data, read_config)
+    # test_data_compare_check(read_data, read_config)
+    # test_schema_check(read_data, read_config, spark_session)

@@ -34,7 +34,7 @@
 # try:
 #     final_df.write.jdbc(
 #         url=jdbc_url,
-#         table='customer_silver_expected',
+#         table='customers_silver_scd2_expected',
 #         mode='overwrite',  # This will overwrite the existing data
 #         properties=jdbc_properties
 #     )

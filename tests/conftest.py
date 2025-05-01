@@ -121,6 +121,10 @@ def read_data(read_config,spark_session,request ):
             python_file_path = dir_path + '/transformation.py'
             print("python file name", python_file_path)
             subprocess.run(["python", python_file_path])
+
+
+
+
         source = read_db(config_data=source_config,spark=spark,dir_path=dir_path)
 
     else:

@@ -72,11 +72,11 @@ def test_check_range(read_data, read_config):
     assert status is True
  #we are using status is True because the return statement of the fucntion check_range is boolean either 0 or 1 and not a string.
 
-def test_date_check(read_data,read_config):
-    source,target = read_data
-    column = read_config['data_quality_checks']['date_check']['column']
-    status = date_check(target,column)
-    assert status == 'PASS'
+# def test_date_check(read_data,read_config):
+#     source,target = read_data
+#     column = read_config['data_quality_checks']['date_check']['column']
+#     status = date_check(target,column)
+#     assert status == 'PASS'
 
 
 

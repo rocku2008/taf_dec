@@ -1,6 +1,6 @@
 source:
   #path: "C:\\Users\\souls\\PycharmProjects\\MyProj\\taf_dec\\input_files\\Contact_info.csv"
-  path: "../input_files/Contact_info.csv"
+  path: "Contact_info.csv"
   type: "csv"
   schema: "Y"
   options:
@@ -9,7 +9,7 @@ source:
   exclude_cols: ["created_date", "updated_date", "hash_key", "batch_id"]
 
 target:
-  path: "../input_files/Contact_info.csv"
+  path: "Contact_info.csv"
   type: "csv"
   schema: "Y"
   options:
